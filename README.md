@@ -2,7 +2,7 @@
 
 Inspired by [Tiny-Agent](https://github.com/KMnO4-zx/TinyAgent).
 
-An agent based on the [ReAct](https://arxiv.org/abs/2210.03629) developed using OpenAI's models, capable of utilizing external search capabilities.
+A tiny agent based on [ReAct](https://arxiv.org/abs/2210.03629), OpenAI API compatible, with built-in search capabilities.
 
 The purpose is to better understand the principles and implementation of [ReAct](https://arxiv.org/abs/2210.03629).
 
@@ -30,6 +30,11 @@ sequenceDiagram
     LLM->>LLM: Generate Final Thought
     LLM->>User: Return FinalAnswer
 ```
+
+# Motivation
+
+- More trendy: [Tiny-Agent](https://github.com/KMnO4-zx/TinyAgent) used local models, but this one will utilize online models, and any OpenAI-compatible model provider can be used.
+- Easier to understand: Agent system prompt has been optimized for a clearer LLM interaction process.
 
 # Setup & Executing
 
