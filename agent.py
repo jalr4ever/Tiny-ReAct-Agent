@@ -1,10 +1,10 @@
 import os
 
+import json5
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
 from instructor import from_openai
 from openai import OpenAI
-import json5
+from pydantic import BaseModel, Field
 
 from tool import Tools
 
@@ -15,7 +15,10 @@ API_BASE = os.getenv("OPENAI_API_BASE")
 API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Tool description template
-TOOL_DESC = """{name_for_model}: Call this tool to interact with the {name_for_human} API. What is the {name_for_human} API useful for? {description_for_model} Parameters: {parameters} Format the arguments as a JSON object."""
+TOOL_DESC = """
+{name_for_model}: Call this tool to interact with the {name_for_human} API. What is the {name_for_human} API useful for?
+{description_for_model} Parameters: {parameters} Format the arguments as a JSON object.
+"""
 
 # System prompt for the ReAct Agent
 REACT_PROMPT = """You are an AI assistant that answers questions using the provided tools when necessary.
@@ -31,7 +34,8 @@ Action Input: [the input to the action]
 When you have the final answer, respond with:
 Final Answer: [the final answer]
 
-You can think and take actions multiple times if needed. When the question involves the current date or real-time data, use a tool.
+You can think and take actions multiple times if needed.
+When the question involves the current date or real-time data, use a tool.
 
 Begin!"""
 
@@ -51,18 +55,18 @@ class OpenAIChat:
 
     def chat(self, messages, response_model=None):
         if response_model:
-            response = self.client.chat.completions.create(
+            chat_response = self.client.chat.completions.create(
                 model=MODEL,
                 messages=messages,
                 response_model=response_model,
             )
-            return response
+            return chat_response
         else:
-            response = self.client.chat.completions.create(
+            chat_response = self.client.chat.completions.create(
                 model=MODEL,
                 messages=messages,
             )
-            return response.choices[0].message.content
+            return chat_response.choices[0].message.content
 
 
 # ReAct Agent class
@@ -92,19 +96,24 @@ class Agent:
         raise ValueError(f"Unknown plugin: {plugin_name}")
 
     def text_completion(self, text, history=None):
-        """Processes the user query through multiple thought/action cycles."""
+        """Processes the user query, maintaining a clean conversation history."""
         if history is None:
             history = []
         print(f"\n👨‍🍳: {text}")
         messages = [{"role": "system", "content": self.system_prompt}] + history
         messages.append({"role": "user", "content": text})
 
+        # Maintain a separate conversation history for user and assistant messages
+        conversation_history = history.copy()
+        conversation_history.append({"role": "user", "content": text})
+
         while True:
             step = self.model.chat(messages, response_model=AgentStep)
             print(f"🤖Step log...[Thinking]: {step.Thought}; [Action]: {step.Action}")
 
             if step.FinalAnswer:
-                return step.FinalAnswer, messages
+                conversation_history.append({"role": "assistant", "content": step.FinalAnswer})
+                return step.FinalAnswer, conversation_history
 
             elif step.Action and step.ActionInput:
                 observation = self.call_plugin(step.Action, step.ActionInput)
@@ -115,19 +124,13 @@ class Agent:
                 raise ValueError("Invalid response from LLM: neither action nor final answer provided")
 
 
-# Main execution for testing
+# Main execution with terminal loop
 if __name__ == '__main__':
     agent = Agent()
-    prompt = agent.build_system_input()
-    print(prompt)
-
-    response, _ = agent.text_completion(text='Hello', history=[])
-    print("✨Final Response(See FinalAnswer): " + response)
-
-    response, _ = agent.text_completion(text='What is the weather like in Shenzhen, China today?', history=[])
-    print("✨Final Response(See FinalAnswer): " + response)
-
-    response, _ = agent.text_completion(
-        text='What is today date? Are US stocks up or down? Please give me the specific data.',
-        history=[])
-    print("✨Final Response(See FinalAnswer): " + response)
+    history = []
+    while True:
+        user_input = input("Enter your question (type 'exit' to quit): ")
+        if user_input.lower() == 'exit':
+            break
+        response, history = agent.text_completion(text=user_input, history=history)
+        print(f"✨Final Response: {response}\n")
