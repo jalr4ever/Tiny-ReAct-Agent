@@ -40,6 +40,8 @@ sequenceDiagram
 
 Apply `Exa.ai` API Key for Web Search: https://dashboard.exa.ai/api-keys
 
+Add .env to the project according to .env.template and fill in your OPENAI & Search Tool service provider information.
+
 Setup environment：
 
 ```bash
