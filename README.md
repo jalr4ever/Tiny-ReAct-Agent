@@ -88,4 +88,5 @@ As of the last trading day on March 25, 2025, the U.S. stock market showed mixed
 Enter your question (type 'exit' to quit): exit
 ```
 
-**Note**: It cannot be guaranteed that there will be no errors or that the expected results will be obtained every time it runs, because the agent itself is currently unstable, which does not fall under code bugs.
+**Note**:
+Running agent might encounter errors, as **ReAct doesn't guarantee stable Agent operation**. To reduce the probability of errors, it's recommended to use a more powerful model, such as gpt-4o (default), or other SOTA models of similar capability.
