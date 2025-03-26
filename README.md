@@ -38,14 +38,14 @@ Apply `Exa.ai` API Key for Web Search: https://dashboard.exa.ai/api-keys
 Setup environment：
 
 ```bash
-conda create -n tiny-oai-agent python=3.11
+conda create -n tiny-react-agent python=3.11
 pip install -r requirements.txt
 python agent.py
 ```
 
 Output Example:
 ```bash
-(tiny-oai-agent) L@Warren-MBP Tiny-OAI-Agent % python agent.py
+(tiny-react-agent) L@Warren-MBP Tiny-OAI-Agent % python agent.py
 Enter your question (type 'exit' to quit): hi
 
 👨‍🍳: hi
